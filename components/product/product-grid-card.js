@@ -1,8 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
-function ProductGridCard({ id, title, off }) {
-  let price = 10000;
+function ProductGridCard({ id, title, off  , image , price}) {
   let percentOff;
   let offPrice = `${price}Ks`;
 
@@ -25,14 +24,12 @@ function ProductGridCard({ id, title, off }) {
   }
   return (
     <div className="card h-100 border-0 shadow-sm">
-      <Link href="/product/1">
+      <Link href={`/product/${id}`}>
         <a>
           <div className="ratio ratio-1x1">
             <img
               className="card-img-top "
-              src={`https://source.unsplash.com/random/200x240?random=${Math.floor(
-                Math.random() * 100
-              )}`}
+              src={`${image}`}             
               alt="Product image."
               style={{ objectFit: "cover" }}
             />
@@ -43,7 +40,7 @@ function ProductGridCard({ id, title, off }) {
       <div className="card-body">
         <div className="vstack gap-2">
           <Link href="/product/1">
-            <a className="text-dark text-decoration-none">Product name here</a>
+            <a className="text-dark text-decoration-none">{title}</a>
           </Link>
 
           <h6 className="fw-semibold">{offPrice}</h6>

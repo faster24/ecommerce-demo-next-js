@@ -1,8 +1,38 @@
+import { useEffect, useState } from "react";
 import AccountMenu from "../../components/account-menu";
 import OrderHistoryItem from "../../components/account/order-history-item";
 import Layout from "../../components/layout";
+import { useAppContext } from "../../lib/AppContext";
+import axiosInstance from "../../api/api.js";
 
 function OrderHistory() {
+  const { isAuthenticated, loading: contextLoading, error: contextError } = useAppContext();
+  const [orders, setOrders] = useState([]);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+
+  const fetchOrderHistory = async () => {
+    setFetchLoading(true);
+    setFetchError(null);
+    try {
+      const response = await axiosInstance.get("/order/history"); // Fixed endpoint
+      console.log(response.data)
+      setOrders(response.data);
+    } catch (err) {
+      setFetchError(err.response?.data?.message || "Failed to fetch order history");
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderHistory();
+  }, [isAuthenticated]);
+
+  if (contextLoading || fetchLoading) return <div>Loading...</div>;
+  if (contextError) return <div className="text-danger">Error: {contextError}</div>;
+  if (fetchError) return <div className="text-danger">Error: {fetchError}</div>;
+
   return (
     <div>
       <div className="bg-secondary">
@@ -27,38 +57,25 @@ function OrderHistory() {
             <AccountMenu current="order-history" />
           </div>
           <div className="col-lg-9">
-            <OrderHistoryItem id={20001} />
-            <OrderHistoryItem id={20002} cancel />
-
-            <nav className="float-end mt-3">
-              <ul className="pagination">
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    Prev
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    1
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    2
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    3
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    Next
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            {orders.length === 0 ? (
+              <p>No order history found.</p>
+            ) : (
+              orders.map((order) => (
+                <OrderHistoryItem
+                  key={order.id}
+                  id={order.id}
+                  number={order.number}
+                  status={order.status}
+                  total={order.total_price}
+                  shippingPrice={order.shipping_price}
+                  shippingMethod={order.shipping_method}
+                  shippingAddress={order.shipping_address}
+                  items={order.items}
+                  createdAt={order.created_at}
+                  cancel={order.status === "cancelled"}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

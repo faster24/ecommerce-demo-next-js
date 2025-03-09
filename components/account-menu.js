@@ -51,21 +51,6 @@ function AccountMenu({ current }) {
               Orders history
             </a>
           </Link>
-
-          <Link href="/account/favorite-list">
-            <a
-              className={
-                itemCss + (current == "favorite-list" ? " active" : "")
-              }
-            >
-              <FontAwesomeIcon
-                icon={["fas", "heart"]}
-                className="me-2"
-                fixedWidth
-              />
-              My favorites
-            </a>
-          </Link>
         </div>
       </div>
     </div>

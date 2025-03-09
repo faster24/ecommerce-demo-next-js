@@ -2,12 +2,95 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AccountMenu from "../../components/account-menu";
 import AddressView from "../../components/account/address-view";
 import Layout from "../../components/layout";
+import { useAppContext } from "../../lib/AppContext";
+import { useEffect, useState } from "react";
 
 const cities = ["Yangon", "Mandalay", "Kalaw"];
-
 const states = ["Thar Kay Ta", "Daw Pon", "San Chaung"];
 
 function Profile() {
+  const { user, getProfile, updateProfile, loading, error } = useAppContext();
+
+  // Local state for form data
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+    phone: "",
+    gender: "male",
+    city: cities[0],
+    state: states[0],
+    birthday: "",
+  });
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    if (!user) {
+      getProfile().then((profile) => {
+        if (profile) {
+          setFormData({
+            name: profile.name || "",
+            email: profile.email || "",
+            password: "", // Don’t prefill password
+            password_confirmation: "",
+            phone: profile.phone || "",
+            gender: profile.gender || "male",
+            city: profile.city || cities[0],
+            state: profile.state || states[0],
+            birthday: profile.birthday ? profile.birthday.split("T")[0] : "", // Format date
+          });
+        }
+      }).catch(() => {
+        // Error handled by AppContext
+      });
+    } else {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        password: "",
+        password_confirmation: "",
+        phone: user.phone || "",
+        gender: user.gender || "male",
+        city: user.city || cities[0],
+        state: user.state || states[0],
+        birthday: user.birthday ? user.birthday.split("T")[0] : "",
+      });
+    }
+  }, [user, getProfile]);
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedData = { ...formData };
+      // Remove empty password fields if not updated
+      if (!updatedData.password) {
+        delete updatedData.password;
+        delete updatedData.password_confirmation;
+      }
+      await updateProfile(updatedData);
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Update failed:", err);
+      // Error is set in AppContext and can be displayed
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-danger">Error: {error}</div>;
+  }
+
   return (
     <div>
       <div className="bg-secondary">
@@ -39,24 +122,39 @@ function Profile() {
                     <h4 className="card-title fw-semibold mt-2 mb-3">
                       Profile
                     </h4>
-                    <form className="row g-3">
+                    <form className="row g-3" onSubmit={handleSubmit}>
                       <div className="col-md-6">
                         <label className="form-label">Your Name</label>
-                        <input type="text" className="form-control" />
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                        />
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">Password</label>
                         <input
                           type="password"
-                          className="form-control bg-light"
-                          disabled
+                          className="form-control"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          placeholder="Leave blank to keep unchanged"
                         />
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-link float-end p-0 text-decoration-none"
-                        >
-                          Change password
-                        </button>
+                        {formData.password && (
+                          <div className="mt-2">
+                            <label className="form-label">Confirm Password</label>
+                            <input
+                              type="password"
+                              className="form-control"
+                              name="password_confirmation"
+                              value={formData.password_confirmation}
+                              onChange={handleChange}
+                            />
+                          </div>
+                        )}
                       </div>
                       <div className="col-md-12 mt-0">
                         <label className="form-label">Phone</label>
@@ -66,42 +164,91 @@ function Profile() {
                               <option>+95</option>
                             </select>
                           </div>
-                          <input type="tel" className="form-control" />
+                          <input
+                            type="tel"
+                            className="form-control"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                          />
                         </div>
                       </div>
                       <div className="col-md-12">
                         <label className="form-label">Email</label>
-                        <input type="email" className="form-control" />
+                        <input
+                          type="email"
+                          className="form-control"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
                       </div>
                       <div className="col-md-12">
                         <div className="form-check form-check-inline">
-                          <input className="form-check-input" type="radio" />
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="gender"
+                            value="male"
+                            checked={formData.gender === "male"}
+                            onChange={handleChange}
+                          />
                           <label className="form-check-label">Male</label>
                         </div>
                         <div className="form-check form-check-inline">
-                          <input className="form-check-input" type="radio" />
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="gender"
+                            value="female"
+                            checked={formData.gender === "female"}
+                            onChange={handleChange}
+                          />
                           <label className="form-check-label">Female</label>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">City</label>
-                        <select className="form-select">
-                          {cities.map((e, i) => {
-                            return <option key={i}>{e}</option>;
-                          })}
+                        <select
+                          className="form-select"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleChange}
+                        >
+                          {cities.map((e, i) => (
+                            <option key={i} value={e}>
+                              {e}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">States</label>
-                        <select className="form-select">
-                          {states.map((e, i) => {
-                            return <option key={i}>{e}</option>;
-                          })}
+                        <select
+                          className="form-select"
+                          name="state"
+                          value={formData.state}
+                          onChange={handleChange}
+                        >
+                          {states.map((e, i) => (
+                            <option key={i} value={e}>
+                              {e}
+                            </option>
+                          ))}
                         </select>
                       </div>
-
+                      <div className="col-md-12">
+                        <label className="form-label">Birthday</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          name="birthday"
+                          value={formData.birthday}
+                          onChange={handleChange}
+                        />
+                      </div>
                       <div className="col-md-12 mt-4">
-                        <button className="btn btn-primary float-end">
+                        <button type="submit" className="btn btn-primary float-end">
                           Update
                         </button>
                       </div>
@@ -114,7 +261,7 @@ function Profile() {
                     <h5 className="my-auto fw-semibold">Addresses</h5>
                     <button className="btn btn-sm btn-secondary text-primary ms-auto">
                       <FontAwesomeIcon icon={["fas", "plus"]} />
-                      &nbsp;Add new
+                       Add new
                     </button>
                   </div>
                   <div className="card-body">

@@ -1,20 +1,26 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { useEffect } from "react"; // Removed useState since we’ll use context
+import { useAppContext } from "../lib/AppContext"; // Import the context hook
 
 function Header({ simple, hideAuth }) {
-  let title = process.env.APP_NAME;
+  const { isAuthenticated, logout, cart } = useAppContext(); // Access cart and auth from context
+
+  // Logout function to clear token and update state
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    logout(); // Use logout from context to clear auth and cart
+    window.location.href = "/auth/login"; // Or use Next.js router
+  };
+
   return (
     <header>
       <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
         <div className="container">
           <Link href="/">
             <a className="navbar-brand">
-              {/* <FontAwesomeIcon
-                icon={["fas", "shopping-basket"]}
-                className="d-inline-block"
-              /> */}
               <span className="ms-2 mb-0 h4 text-primary fw-bold">
-                Mocha Mart
+                Swiss Time Square
               </span>
             </a>
           </Link>
@@ -37,24 +43,73 @@ function Header({ simple, hideAuth }) {
           <div className="d-flex">
             {!hideAuth && (
               <>
-                <Link href="/auth/login">
-                  <a className="btn btn-outline-primary d-none d-md-block">
-                    Login
-                  </a>
-                </Link>
-                <Link href="/auth/sign-up">
-                  <a className="btn btn-primary d-none d-md-block ms-2">
-                    Sign up
-                  </a>
-                </Link>
+                {!isAuthenticated ? (
+                  <>
+                    <Link href="/auth/login">
+                      <a className="btn btn-outline-primary d-none d-md-block">
+                        Login
+                      </a>
+                    </Link>
+                    <Link href="/auth/sign-up">
+                      <a className="btn btn-primary d-none d-md-block ms-2">
+                        Sign up
+                      </a>
+                    </Link>
+                  </>
+                ) : (
+                  <div className="dropdown d-none d-md-block">
+                    <button
+                      className="btn btn-outline-primary dropdown-toggle"
+                      type="button"
+                      id="profileDropdown"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <FontAwesomeIcon icon={["fas", "user"]} /> Profile
+                    </button>
+                    <ul
+                      className="dropdown-menu dropdown-menu-end"
+                      aria-labelledby="profileDropdown"
+                    >
+                      <li>
+                        <Link href="/account/profile">
+                          <a className="dropdown-item">
+                            <FontAwesomeIcon icon={["fas", "user"]} className="me-2" />
+                            Profile
+                          </a>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/account/order-history">
+                          <a className="dropdown-item">
+                            <FontAwesomeIcon icon={["fas", "list"]} className="me-2" />
+                            Order History
+                          </a>
+                        </Link>
+                      </li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item text-danger"
+                          onClick={handleLogout}
+                        >
+                          <FontAwesomeIcon icon={["fas", "sign-out-alt"]} className="me-2" />
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </>
             )}
             <Link href="/shopping-cart">
               <a className="btn btn-light border position-relative ms-2 fw-normal">
                 <FontAwesomeIcon icon={["fas", "shopping-cart"]} />
-                &nbsp;Cart
+                 Cart
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger my-auto">
-                  3
+                  {cart.length} {/* Display dynamic cart item count */}
                 </span>
               </a>
             </Link>
@@ -79,62 +134,8 @@ function Header({ simple, hideAuth }) {
               <ul className="navbar-nav">
                 <li className="nav-item">
                   <Link href="/explore">
-                    <a className="nav-link">All Categories</a>
+                    <a className="nav-link">Explore</a>
                   </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Electronics</a>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Clothing</a>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Furnitures</a>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Medicines</a>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Cosmetics</a>
-                  </Link>
-                </li>
-              </ul>
-              <ul className="ms-auto navbar-nav">
-                <li className="nav-item dropdown">
-                  <a
-                    href="#"
-                    className="nav-link dropdown-toggle"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    id="languageMenuLink"
-                  >
-                    English
-                  </a>
-                  <ul
-                    className="dropdown-menu dropdown-menu-macos dropdown-menu-end"
-                    aria-labelledby="languageMenuLink"
-                  >
-                    <li>
-                      <a href="#" className="dropdown-item">
-                        English
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="dropdown-item mt-1">
-                        Myanmar
-                      </a>
-                    </li>
-                  </ul>
                 </li>
               </ul>
             </div>

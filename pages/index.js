@@ -1,9 +1,23 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Carousel } from "react-responsive-carousel";
 import ProductSimpleCard from "../components/product/product-simple-card";
+import { useEffect, useState } from 'react';
+import axiosInstance from "../api/api";
 
 export default function Home() {
-  const list = [1, 2, 3, 4, 5, 6, 7, 8];
+  // State to store the fetched products
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    axiosInstance.get('/products') // Replace with your API endpoint
+      .then((response) => {
+        console.log(response.data.data)
+        setProducts(response.data.data)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   return (
     <div>
@@ -129,34 +143,18 @@ export default function Home() {
         </div>
         <h4 className="mb-3 fw-semibold">New products</h4>
         <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-5">
-          {list.map((e, i) => {
-            return (
-              <div className="col" key={i}>
-                <ProductSimpleCard id={i} title={`Product ${i}`} />
-              </div>
-            );
-          })}
+          {products.map((product) => (
+            <div className="col" key={product.id}>
+              <ProductSimpleCard
+                id={product.id}
+                title={product.name} // Assuming the product has a `name` field
+                price={product.price} // Assuming the product has a `price` field
+                image={product.image_urls[0]}
+              />
+            </div>
+          ))}
         </div>
       </div>
-      {/* <div className="d-flex flex-column align-items-center bg-primary py-5">
-        <span className="mb-4 text-light text-opacity-75">
-          Subscribe for promotions and wonderful events
-        </span>
-        <form className="d-flex">
-          <div className="me-2">
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Your email"
-              size="24"
-            />
-          </div>
-          <button className="btn btn-warning">
-            <FontAwesomeIcon icon={["fas", "envelope"]} className="me-2" />
-            Subscribe
-          </button>
-        </form>
-      </div> */}
     </div>
   );
 }

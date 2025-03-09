@@ -1,7 +1,90 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router"; // Import useRouter for query params
 import ProductGridCard from "../../components/product/product-grid-card";
+import axiosInstance from "../../api/api.js";
 
 function ExploreProducts() {
+  const router = useRouter();
+
+  // State for data
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // State for filters
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  // Sync filters with URL query params on mount
+  useEffect(() => {
+    const { category, brand, min_price, max_price } = router.query;
+
+    if (category) setSelectedCategory(category);
+    if (brand) setSelectedBrand(brand);
+    if (min_price) setMinPrice(min_price);
+    if (max_price) setMaxPrice(max_price);
+
+    // Fetch brands and categories
+    axiosInstance
+      .get("/brands")
+      .then((response) => setBrands(response.data))
+      .catch((error) => console.error("Error fetching brands:", error));
+    axiosInstance
+      .get("/categories")
+      .then((response) => setCategories(response.data))
+      .catch((error) => console.error("Error fetching categories:", error));
+
+    // Fetch products with initial query params
+    fetchProducts();
+  }, [router.query]); // Re-run if query changes
+
+  // Function to fetch products based on filters
+  const fetchProducts = () => {
+    setLoading(true);
+    let queryParams = [];
+
+    if (selectedCategory) queryParams.push(`category_id=${selectedCategory}`);
+    if (selectedBrand) queryParams.push(`brand_id=${selectedBrand}`);
+    if (minPrice !== "") queryParams.push(`min_price=${minPrice}`);
+    if (maxPrice !== "") queryParams.push(`max_price=${maxPrice}`);
+
+    const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+    axiosInstance
+      .get(`/products/search${queryString}`)
+      .then((response) => {
+        setProducts(response.data.data || []); // Fallback to empty array
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      });
+  };
+
+  // Update URL and fetch products on filter submit
+  const handleFilterSubmit = (e) => {
+    e.preventDefault();
+    const query = {};
+    if (selectedCategory) query.category = selectedCategory;
+    if (selectedBrand) query.brand = selectedBrand;
+    if (minPrice !== "") query.min_price = minPrice;
+    if (maxPrice !== "") query.max_price = maxPrice;
+
+    router.push(
+      {
+        pathname: "/explore", // Adjust if your route is different
+        query,
+      },
+      undefined,
+      { shallow: true } // Prevents full page reload
+    );
+    fetchProducts();
+  };
+
   return (
     <div className="vstack">
       <div className="bg-secondary">
@@ -9,223 +92,160 @@ function ExploreProducts() {
           <div className="row py-4 px-2">
             <nav aria-label="breadcrumb col-12">
               <ol className="breadcrumb mb-1">
-                <li className="breadcrumb-item">
-                  <a href="#">All Categories</a>
-                </li>
-                <li className="breadcrumb-item">
-                  <a href="#">Electronics</a>
-                </li>
-                <li className="breadcrumb-item active" aria-current="page">
-                  Phones & Tablets
-                </li>
+                <li className="breadcrumb-item">Our Products</li>
               </ol>
             </nav>
           </div>
         </div>
       </div>
+
       <div className="container py-4">
         <div className="row g-3">
           <div className="col-lg-3">
-            <div className="accordion shadow-sm rounded">
+            <form className="accordion shadow-sm rounded" onSubmit={handleFilterSubmit}>
+              {/* Categories Accordion */}
               <div className="accordion-item border-bottom">
                 <h2 className="accordion-header">
                   <button
                     className="accordion-button fw-bold"
+                    type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#collapseOne"
+                    data-bs-target="#categories-collapse"
                     aria-expanded="true"
                   >
                     Categories
                   </button>
                 </h2>
-                <div
-                  id="collapseOne"
-                  className="accordion-collapse collapse show"
-                >
+                <div id="categories-collapse" className="accordion-collapse collapse show">
                   <div className="accordion-body pt-2">
                     <div className="vstack gap-2">
-                      <a
-                        href="#"
-                        className="fw-medium link-dark text-decoration-none"
-                      >
-                        Phones & Tablets
-                      </a>
-                      <a
-                        href="#"
-                        className="fw-medium link-dark text-decoration-none"
-                      >
-                        Laptops & PC
-                      </a>
-                      <a
-                        href="#"
-                        className="fw-medium link-dark text-decoration-none"
-                      >
-                        Monitors
-                      </a>
-                      <a
-                        href="#"
-                        className="fw-medium link-dark text-decoration-none"
-                      >
-                        Game Controllers
-                      </a>
-                      <a
-                        href="#"
-                        className="fw-medium link-dark text-decoration-none"
-                      >
-                        Cables & Chargers
-                      </a>
+                      {categories.map((category) => (
+                        <div key={category.id} className="d-flex gap-2">
+                          <input
+                            type="radio"
+                            name="category"
+                            className="form-check-input"
+                            value={category.id}
+                            checked={selectedCategory === String(category.id)} // Ensure string comparison
+                            onChange={() => setSelectedCategory(String(category.id))}
+                          />
+                          <label className="fw-medium flex-grow-1">{category.name}</label>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Brands Accordion */}
               <div className="accordion-item border-bottom">
                 <h2 className="accordion-header">
                   <button
                     className="accordion-button fw-bold"
+                    type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#collapseTwo"
+                    data-bs-target="#brands-collapse"
                     aria-expanded="true"
                   >
                     Brands
                   </button>
                 </h2>
-                <div
-                  id="collapseTwo"
-                  className="accordion-collapse collapse show"
-                >
+                <div id="brands-collapse" className="accordion-collapse collapse show">
                   <div className="accordion-body pt-2">
                     <div className="vstack gap-2">
-                      <div className="d-flex gap-2">
-                        <input type="checkbox" className="form-check-input" />
-                        <label className="fw-medium flex-grow-1">Apple</label>
-                        <span className="badge bg-default rounded-pill my-auto mb-0 text-dark">
-                          50
-                        </span>
-                      </div>
-                      <div className="d-flex gap-2">
-                        <input type="checkbox" className="form-check-input" />
-                        <label className="fw-medium flex-grow-1">Samsung</label>
-                        <span className="badge bg-default rounded-pill my-auto mb-0 text-dark">
-                          100
-                        </span>
-                      </div>
-                      <div className="d-flex gap-2">
-                        <input type="checkbox" className="form-check-input" />
-                        <label className="fw-medium flex-grow-1">Sony</label>
-                        <span className="badge bg-default rounded-pill my-auto mb-0 text-dark">
-                          30
-                        </span>
-                      </div>
-                      <div className="d-flex gap-2">
-                        <input type="checkbox" className="form-check-input" />
-                        <label className="fw-medium flex-grow-1">AOC</label>
-                        <span className="badge bg-default rounded-pill my-auto mb-0 text-dark">
-                          60
-                        </span>
-                      </div>
+                      {brands.map((brand) => (
+                        <div key={brand.id} className="d-flex gap-2">
+                          <input
+                            type="radio"
+                            name="brand"
+                            className="form-check-input"
+                            value={brand.id}
+                            checked={selectedBrand === String(brand.id)}
+                            onChange={() => setSelectedBrand(String(brand.id))}
+                          />
+                          <label className="fw-medium flex-grow-1">{brand.name}</label>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Price Range Accordion */}
               <div className="accordion-item">
                 <h2 className="accordion-header">
                   <button
                     className="accordion-button fw-bold"
+                    type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#collapseThree"
+                    data-bs-target="#price-collapse"
                     aria-expanded="true"
                   >
                     Price Range
                   </button>
                 </h2>
-                <div
-                  id="collapseThree"
-                  className="accordion-collapse collapse show"
-                >
+                <div id="price-collapse" className="accordion-collapse collapse show">
                   <div className="accordion-body pt-0">
-                    <form className="row g-3">
+                    <div className="row g-3">
                       <div className="col-6">
                         <label className="form-label">Min</label>
-                        <input type="text" className="form-control" />
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={minPrice}
+                          onChange={(e) => setMinPrice(e.target.value)}
+                          placeholder="0"
+                          min="0"
+                        />
                       </div>
                       <div className="col-6">
                         <label className="form-label">Max</label>
-                        <input type="text" className="form-control" />
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={maxPrice}
+                          onChange={(e) => setMaxPrice(e.target.value)}
+                          placeholder="1000"
+                          min="0"
+                        />
                       </div>
                       <div className="col-12">
-                        <button className="btn btn-primary w-100">Apply</button>
+                        <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                          {loading ? "Loading..." : "Apply Filters"}
+                        </button>
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
+
+          {/* Product Grid */}
           <div className="col-lg-9">
             <div className="hstack justify-content-between mb-3">
-              <span className="text-dark">33 Items found</span>
-              <div className="btn-group" role="group">
-                <button className="btn btn-outline-dark">
-                  <FontAwesomeIcon icon={["fas", "sort-amount-up"]} />
-                </button>
-                <button className="btn btn-outline-dark">
-                  <FontAwesomeIcon icon={["fas", "th-list"]} />
-                </button>
-              </div>
-            </div>
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-              <div className="col">
-                <ProductGridCard />
-              </div>
-              <div className="col">
-                <ProductGridCard off={10} />
-              </div>
-              <div className="col">
-                <ProductGridCard />
-              </div>
-              <div className="col">
-                <ProductGridCard />
-              </div>
-              <div className="col">
-                <ProductGridCard />
-              </div>
-              <div className="col">
-                <ProductGridCard off={25} />
-              </div>
-              <div className="col">
-                <ProductGridCard />
-              </div>
+              <span className="text-dark">{loading ? "Loading..." : `${products.length} Items found`}</span>
             </div>
 
-            <nav className="float-end mt-3">
-              <ul className="pagination">
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    Prev
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    1
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    2
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    3
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="#">
-                    Next
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            {loading ? (
+              <p>Loading products...</p>
+            ) : products.length === 0 ? (
+              <p>No products found.</p>
+            ) : (
+              <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                {products.map((product) => (
+                  <div key={product.id} className="col">
+                    <ProductGridCard
+                      id={product.id}
+                      title={product.name}
+                      price={product.price}
+                      image={product.media?.[0]?.original_url || "/placeholder-image.jpg"} // Fallback image
+                      off={0}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
