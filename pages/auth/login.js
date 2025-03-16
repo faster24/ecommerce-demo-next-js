@@ -2,63 +2,33 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "../../components/layout";
-import { useState } from "react"; // Import useState for form state management
-import axiosInstance from "../../api/api.js"; // Import your Axios instance
+import { useState } from "react";
+import { useAppContext } from "../../lib/AppContext"; // Adjust path if needed
 
 function Login() {
   const router = useRouter();
-
-  // State to manage form inputs
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  // State to handle API response messages
+  const { login } = useAppContext(); // Use context login
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-
+    e.preventDefault();
     try {
-      // Send a POST request to the Laravel login API using Axios
-      const response = await axiosInstance.post("/login", formData);
-
-      // Login successful
+      await login(formData.email, formData.password); // Use context login
       setMessage("Login successful! Redirecting...");
       setIsError(false);
-
-      // Store the token in localStorage (or cookies)
-      localStorage.setItem("token", response.data.token);
-
-      // Redirect to the profile page after a delay
-      setTimeout(() => {
-        router.push("/account/profile").then(() => {
-          window.location.reload(); // Reload after navigation
-        });
-      }, 2000);
+      router.push("/account/profile");
     } catch (error) {
-      // Handle errors
-      if (error.response) {
-        // Backend returned an error response
-        setMessage(error.response.data.message || "Login failed. Please try again.");
-      } else {
-        // Network or other errors
-        setMessage("An error occurred. Please try again.");
-      }
+      console.error("Login Error:", error);
+      setMessage(error.message || "Login failed. Please try again.");
       setIsError(true);
-      console.error("Error:", error);
+      // No redirect needed; stay on /auth/login
     }
   };
 
@@ -69,18 +39,11 @@ function Login() {
           <div className="card border-0 shadow-sm">
             <div className="card-body px-4">
               <h4 className="card-title fw-bold mt-2 mb-4">Sign In</h4>
-
-              {/* Display success/error messages */}
               {message && (
-                <div
-                  className={`alert ${
-                    isError ? "alert-danger" : "alert-success"
-                  }`}
-                >
+                <div className={`alert ${isError ? "alert-danger" : "alert-success"}`}>
                   {message}
                 </div>
               )}
-
               <form className="row g-2" onSubmit={handleSubmit}>
                 <div className="col-md-12">
                   <label className="form-label">Email</label>
@@ -111,10 +74,7 @@ function Login() {
                   </Link>
                 </div>
                 <div className="col-md-12 mt-4">
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                  >
+                  <button type="submit" className="btn btn-primary w-100">
                     Login
                   </button>
                 </div>
@@ -131,7 +91,6 @@ function Login() {
                     </div>
                   </div>
                 </div>
-
                 <div className="col-md-12">
                   <div className="hstack gap-2 justify-content-center">
                     <button className="btn-facebook rounded-circle">
@@ -149,7 +108,7 @@ function Login() {
             </div>
             <hr className="text-muted my-0" />
             <div className="text-center p-3">
-              Don&lsquo;t have an account?{" "}
+              Don‘t have an account?{" "}
               <Link href="/auth/sign-up">
                 <a className="text-decoration-none fw-medium">Register</a>
               </Link>
@@ -157,19 +116,14 @@ function Login() {
           </div>
         </div>
       </div>
-      <br />
-      <br />
-      <br />
     </div>
   );
 }
 
-Login.getLayout = (page) => {
-  return (
-    <Layout simpleHeader hideAuth>
-      {page}
-    </Layout>
-  );
-};
+Login.getLayout = (page) => (
+  <Layout simpleHeader hideAuth>
+    {page}
+  </Layout>
+);
 
 export default Login;

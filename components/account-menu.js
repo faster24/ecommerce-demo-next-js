@@ -22,21 +22,6 @@ function AccountMenu({ current }) {
             </a>
           </Link>
 
-          <Link href="/account/current-orders">
-            <a
-              className={
-                itemCss + (current == "current-orders" ? " active" : "")
-              }
-            >
-              <FontAwesomeIcon
-                icon={["fas", "shopping-bag"]}
-                className="me-2"
-                fixedWidth
-              />
-              Current orders
-            </a>
-          </Link>
-
           <Link href="/account/order-history">
             <a
               className={

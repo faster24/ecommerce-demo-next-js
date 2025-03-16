@@ -130,15 +130,6 @@ function Header({ simple, hideAuth }) {
             >
               <span className="navbar-toggler-icon"></span>
             </button>
-            <div className="collapse navbar-collapse" id="navbarNavDropdown">
-              <ul className="navbar-nav">
-                <li className="nav-item">
-                  <Link href="/explore">
-                    <a className="nav-link">Explore</a>
-                  </Link>
-                </li>
-              </ul>
-            </div>
           </div>
         </nav>
       )}

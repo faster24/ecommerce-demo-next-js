@@ -9,7 +9,7 @@ function PricingCard({ subtotal = 0, total = 0, pricingOnly, onCheckout, childre
   const handleCheckout = async () => {
     try {
       await onCheckout(); // Call buyOrder from AppContext
-      router.push("/checkout/success"); // Redirect to a success page (create this route)
+      router.push('/checkout/delivery-info')
     } catch (err) {
       console.error("Checkout failed:", err);
       // Error is already set in AppContext, so it’ll show in ShoppingCart
@@ -47,7 +47,7 @@ function PricingCard({ subtotal = 0, total = 0, pricingOnly, onCheckout, childre
               <button className="btn btn-primary" onClick={handleCheckout}>
                 Checkout
               </button>
-              <Link href="/">
+              <Link href="/explore">
                 <a className="btn btn-outline-primary">Continue Shopping</a>
               </Link>
             </div>

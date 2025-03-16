@@ -255,26 +255,6 @@ function Profile() {
                     </form>
                   </div>
                 </div>
-
-                <div className="card border-0 shadow-sm">
-                  <div className="p-3 d-flex border-bottom">
-                    <h5 className="my-auto fw-semibold">Addresses</h5>
-                    <button className="btn btn-sm btn-secondary text-primary ms-auto">
-                      <FontAwesomeIcon icon={["fas", "plus"]} />
-                       Add new
-                    </button>
-                  </div>
-                  <div className="card-body">
-                    <div className="row row-cols-1 row-cols-lg-2 g-3">
-                      <div className="col">
-                        <AddressView />
-                      </div>
-                      <div className="col">
-                        <AddressView />
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div className="col-lg-3"></div>
             </div>

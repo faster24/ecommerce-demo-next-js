@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router"; // Import useRouter for query params
+import { useRouter } from "next/router";
 import ProductGridCard from "../../components/product/product-grid-card";
 import axiosInstance from "../../api/api.js";
+import { useAppContext } from "../../lib/AppContext";
 
 function ExploreProducts() {
   const router = useRouter();
+  const { addToCart } = useAppContext(); // Get addToCart from context
 
   // State for data
   const [brands, setBrands] = useState([]);
@@ -39,7 +41,7 @@ function ExploreProducts() {
 
     // Fetch products with initial query params
     fetchProducts();
-  }, [router.query]); // Re-run if query changes
+  }, [router.query]);
 
   // Function to fetch products based on filters
   const fetchProducts = () => {
@@ -56,7 +58,7 @@ function ExploreProducts() {
     axiosInstance
       .get(`/products/search${queryString}`)
       .then((response) => {
-        setProducts(response.data.data || []); // Fallback to empty array
+        setProducts(response.data.data || []);
         setLoading(false);
       })
       .catch((error) => {
@@ -76,11 +78,11 @@ function ExploreProducts() {
 
     router.push(
       {
-        pathname: "/explore", // Adjust if your route is different
+        pathname: "/explore",
         query,
       },
       undefined,
-      { shallow: true } // Prevents full page reload
+      { shallow: true }
     );
     fetchProducts();
   };
@@ -126,7 +128,7 @@ function ExploreProducts() {
                             name="category"
                             className="form-check-input"
                             value={category.id}
-                            checked={selectedCategory === String(category.id)} // Ensure string comparison
+                            checked={selectedCategory === String(category.id)}
                             onChange={() => setSelectedCategory(String(category.id))}
                           />
                           <label className="fw-medium flex-grow-1">{category.name}</label>
@@ -239,8 +241,10 @@ function ExploreProducts() {
                       id={product.id}
                       title={product.name}
                       price={product.price}
-                      image={product.media?.[0]?.original_url || "/placeholder-image.jpg"} // Fallback image
-                      off={0}
+                      image={product.media?.[0]?.original_url || "/placeholder-image.jpg"}
+                      off={product.off || 0} // Assuming off might be in product data
+                      product={product} // Pass full product object
+                      addToCart={addToCart} // Pass addToCart function
                     />
                   </div>
                 ))}

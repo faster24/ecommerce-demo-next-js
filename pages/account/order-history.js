@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import FontAwesome for icons
 import AccountMenu from "../../components/account-menu";
 import OrderHistoryItem from "../../components/account/order-history-item";
 import Layout from "../../components/layout";
 import { useAppContext } from "../../lib/AppContext";
 import axiosInstance from "../../api/api.js";
+import Link from "next/link"; // Import Link for navigation
 
 function OrderHistory() {
   const { isAuthenticated, loading: contextLoading, error: contextError } = useAppContext();
@@ -15,8 +17,8 @@ function OrderHistory() {
     setFetchLoading(true);
     setFetchError(null);
     try {
-      const response = await axiosInstance.get("/order/history"); // Fixed endpoint
-      console.log(response.data)
+      const response = await axiosInstance.get("/order/history");
+      console.log(response.data);
       setOrders(response.data);
     } catch (err) {
       setFetchError(err.response?.data?.message || "Failed to fetch order history");
@@ -29,9 +31,16 @@ function OrderHistory() {
     fetchOrderHistory();
   }, [isAuthenticated]);
 
-  if (contextLoading || fetchLoading) return <div>Loading...</div>;
-  if (contextError) return <div className="text-danger">Error: {contextError}</div>;
-  if (fetchError) return <div className="text-danger">Error: {fetchError}</div>;
+  if (contextLoading || fetchLoading) {
+    return (
+      <div className="container py-4 text-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-2">Loading your order history...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -41,7 +50,9 @@ function OrderHistory() {
             <nav aria-label="breadcrumb col-12">
               <ol className="breadcrumb mb-1">
                 <li className="breadcrumb-item">
-                  <a href="#">Home</a>
+                  <Link href="/">
+                    <a>Home</a>
+                  </Link>
                 </li>
                 <li className="breadcrumb-item active" aria-current="page">
                   Order History
@@ -58,7 +69,20 @@ function OrderHistory() {
           </div>
           <div className="col-lg-9">
             {orders.length === 0 ? (
-              <p>No order history found.</p>
+              <div className="card text-center p-4">
+                <FontAwesomeIcon
+                  icon={["fas", "shopping-bag"]}
+                  size="3x"
+                  className="text-muted mb-3"
+                />
+                <h5 className="card-title">No Orders Yet</h5>
+                <p className="card-text text-muted">
+                  It looks like you haven’t placed any orders yet. Start shopping to see your order history here!
+                </p>
+                <Link href="/explore">
+                  <a className="btn btn-primary mt-3">Explore Products</a>
+                </Link>
+              </div>
             ) : (
               orders.map((order) => (
                 <OrderHistoryItem
