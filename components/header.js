@@ -1,16 +1,55 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useEffect } from "react"; // Removed useState since we’ll use context
-import { useAppContext } from "../lib/AppContext"; // Import the context hook
+import { useState, useEffect } from "react";
+import { useAppContext } from "../lib/AppContext";
+import api from "../api/api.js"; 
 
 function Header({ simple, hideAuth }) {
-  const { isAuthenticated, logout, cart } = useAppContext(); // Access cart and auth from context
+  const { isAuthenticated, logout, cart } = useAppContext();
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const [searchResults, setSearchResults] = useState([]); // State for search results
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
-  // Logout function to clear token and update state
+  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
-    logout(); // Use logout from context to clear auth and cart
-    window.location.href = "/auth/login"; // Or use Next.js router
+    logout();
+    window.location.href = "/auth/login";
+  };
+
+  // Fetch products from API when searchQuery changes
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]); // Clear results if query is empty
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await api.get("/products/filterProduct", {
+          params: { name: searchQuery }, // Pass search query as a parameter
+        });
+        if (response.data.status === "success") {
+          setSearchResults(response.data.data); // Set products from API response
+        } else {
+          setSearchResults([]);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const debounce = setTimeout(fetchProducts, 300); // Debounce to limit API calls
+    return () => clearTimeout(debounce); // Cleanup on unmount or query change
+  }, [searchQuery]);
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
   return (
@@ -25,7 +64,7 @@ function Header({ simple, hideAuth }) {
             </a>
           </Link>
           <div className="collapse navbar-collapse">
-            <form className="d-flex">
+            <form className="d-flex position-relative">
               <div className="input-group">
                 <input
                   className="form-control"
@@ -33,11 +72,44 @@ function Header({ simple, hideAuth }) {
                   placeholder="Search..."
                   aria-label="Search"
                   size="32"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
                 />
                 <button type="button" className="btn btn-primary">
                   <FontAwesomeIcon icon={["fas", "search"]} />
                 </button>
               </div>
+              {/* Search Results Dropdown */}
+              {searchQuery && (
+                <div
+                  className="position-absolute bg-white border shadow-sm w-100 mt-5"
+                  style={{ zIndex: 1000, maxHeight: "300px", overflowY: "auto" }}
+                >
+                  {isLoading ? (
+                    <div className="p-2 text-center">Loading...</div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((product) => (
+                      <Link href={`/product/${product.id}`} key={product.id}>
+                        <a className="d-block p-2 text-dark text-decoration-none hover:bg-light">
+                          <div className="d-flex align-items-center">
+                            {product.media.length > 0 && (
+                              <img
+                                src={product.media[0].url}
+                                alt={product.name}
+                                className="me-2"
+                                style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                              />
+                            )}
+                            <span>{product.name}</span>
+                          </div>
+                        </a>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="p-2 text-center">No products found</div>
+                  )}
+                </div>
+              )}
             </form>
           </div>
           <div className="d-flex">
@@ -109,7 +181,7 @@ function Header({ simple, hideAuth }) {
                 <FontAwesomeIcon icon={["fas", "shopping-cart"]} />
                  Cart
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger my-auto">
-                  {cart.length} {/* Display dynamic cart item count */}
+                  {cart.length}
                 </span>
               </a>
             </Link>

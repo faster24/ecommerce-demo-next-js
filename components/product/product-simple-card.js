@@ -8,7 +8,7 @@ export default function ProductSimpleCard({ id, title, price, image, product, ad
 
   return (
     <div className="card h-100 border-0 shadow-sm">
-      <Link href={`/products/${id}`}>
+      <Link href={`/product/${id}`}>
         <a className="text-decoration-none">
           <img
             src={image || "/images/placeholder.jpg"} // Fallback image

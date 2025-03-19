@@ -34,26 +34,6 @@ export default function Home() {
       })
       .catch((error) => {
         console.error("Error fetching blogs:", error);
-        setBlogs([
-          {
-            id: 1,
-            title: "Top 5 Trends in E-Commerce 2025",
-            content: "Discover the latest trends shaping online shopping this year.",
-            slug: "top-5-trends-2025",
-          },
-          {
-            id: 2,
-            title: "How to Choose the Perfect Gift",
-            content: "Tips and tricks for finding the ideal present for any occasion.",
-            slug: "choose-perfect-gift",
-          },
-          {
-            id: 3,
-            title: "Sustainable Shopping Guide",
-            content: "Learn how to shop eco-friendly with our expert advice.",
-            slug: "sustainable-shopping-guide",
-          },
-        ]);
       });
   }, []);
 

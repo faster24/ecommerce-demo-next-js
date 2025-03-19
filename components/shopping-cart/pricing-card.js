@@ -8,7 +8,6 @@ function PricingCard({ subtotal = 0, total = 0, pricingOnly, onCheckout, childre
 
   const handleCheckout = async () => {
     try {
-      await onCheckout(); // Call buyOrder from AppContext
       router.push('/checkout/delivery-info')
     } catch (err) {
       console.error("Checkout failed:", err);

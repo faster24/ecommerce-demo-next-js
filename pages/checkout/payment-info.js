@@ -4,8 +4,10 @@ import CheckoutStepper from "../../components/checkout/checkout-stepper";
 import PaymentOptionCheck from "../../components/checkout/payment-option-check";
 import Layout from "../../components/layout";
 import PricingCard from "../../components/shopping-cart/pricing-card";
+import { useAppContext } from "../../lib/AppContext"; // Import context
 
 function PaymentInfo() {
+  const { subtotal, total } = useAppContext(); // Access pricing data from context
   const [option, setOption] = useState("visa");
 
   function handlePaymentOptionChange(name) {
@@ -30,19 +32,19 @@ function PaymentInfo() {
                     <PaymentOptionCheck
                       name="cod"
                       title="Cash on delivery"
-                      checked={option == "cod"}
+                      checked={option === "cod"}
                       onCheckedChanged={setOption}
                     />
                     <PaymentOptionCheck
                       name="mpu"
                       title="MPU"
-                      checked={option == "mpu"}
+                      checked={option === "mpu"}
                       onCheckedChanged={setOption}
                     />
                     <PaymentOptionCheck
                       name="visa"
                       title="VISA"
-                      checked={option == "visa"}
+                      checked={option === "visa"}
                       onCheckedChanged={setOption}
                     />
                   </div>
@@ -105,7 +107,11 @@ function PaymentInfo() {
           </div>
         </div>
         <div className="col-lg-4">
-          <PricingCard pricingOnly />
+          <PricingCard
+            pricingOnly // Keep pricing-only as per original design
+            subtotal={subtotal}
+            total={total}
+          />
         </div>
       </div>
       <br />

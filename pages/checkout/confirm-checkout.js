@@ -5,9 +5,36 @@ import ReviewCartItem from "../../components/checkout/review-cart-item";
 import Layout from "../../components/layout";
 import PricingCard from "../../components/shopping-cart/pricing-card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useAppContext } from "../../lib/AppContext";
+import { useState } from "react";
 
 function ConfirmCheckout() {
   const router = useRouter();
+  const { cart, subtotal, total, deliveryInfo, buyOrder } = useAppContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Function to handle confirm button click with checkout
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      // Call buyOrder from AppContext to process the checkout
+      const orderResponse = await buyOrder();
+      
+      if (orderResponse) {
+        // Successfully placed order, redirect to success page
+        router.push("/checkout/checkout-success");
+      }
+    } catch (err) {
+      // Handle any errors from the buyOrder function
+      setError("Failed to process your order. Please try again.");
+      console.error("Checkout error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="container py-4">
@@ -22,28 +49,20 @@ function ConfirmCheckout() {
             <div className="card-body">
               <h4 className="fw-semibold mb-3">Items in cart</h4>
               <div className="row row-cols-1 row-cols-md-2 g-3">
-                <div className="col">
-                  <ReviewCartItem />
-                </div>
-                <div className="col">
-                  <ReviewCartItem />
-                </div>
-                <div className="col">
-                  <ReviewCartItem />
-                </div>
+                {cart.length > 0 ? (
+                  cart.map((item) => (
+                    <div className="col" key={item.id}>
+                      <ReviewCartItem item={item} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="col">
+                    <p className="text-muted">No items in cart</p>
+                  </div>
+                )}
               </div>
               <hr className="text-muted" />
               <div className="row g-3">
-                <div className="col-md-6">
-                  <h4 className="fw-semibold">Shipping Address</h4>
-                  <div className="vstack text-dark small">
-                    <span>Milk Mocha</span>
-                    <span>No. 33, Mocha Street, Milk Township</span>
-                    <span>Yangon, Myanmar</span>
-                    <span>Tel: +95911223344</span>
-                    <span>Email: milkmocha@domain.com</span>
-                  </div>
-                </div>
                 <div className="col-md-6">
                   <h4 className="fw-semibold">Payment Method</h4>
                   <div className="d-flex gap-3 text-success">
@@ -61,17 +80,19 @@ function ConfirmCheckout() {
           </div>
         </div>
         <div className="col-lg-4">
-          <PricingCard pricingOnly>
+          <PricingCard pricingOnly subtotal={subtotal} total={total}>
+            {error && (
+              <div className="alert alert-danger" role="alert">
+                {error}
+              </div>
+            )}
             <div className="mt-3 d-grid gap-2">
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  router.push({
-                    pathname: "/checkout/checkout-success",
-                  });
-                }}
+                onClick={handleConfirm}
+                disabled={isSubmitting || cart.length === 0}
               >
-                Confirm
+                {isSubmitting ? "Processing..." : "Confirm"}
               </button>
               <Link href="/checkout/payment-info">
                 <a className="btn btn-outline-primary">Return</a>
