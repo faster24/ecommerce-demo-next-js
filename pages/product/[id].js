@@ -4,36 +4,52 @@ import ProductRating from "../../components/product-rating";
 import ProductSimpleHorizontal from "../../components/product/product-simple-horizontal";
 import axiosInstance from "../../api/api.js";
 import { useRouter } from "next/router";
-import { useAppContext } from "../../lib/AppContext"; // Import the context hook
+import { useAppContext } from "../../lib/AppContext"; 
 
 function ProductDetail() {
   const router = useRouter();
   const { id } = router.query;
-  const { addToCart } = useAppContext(); // Access addToCart from context
+  const { addToCart } = useAppContext(); 
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch product data when id is available
   useEffect(() => {
     if (!router.isReady || !id) return;
 
     setLoading(true);
-    axiosInstance
-      .get(`/products/${id}`)
-      .then((response) => {
-        setProduct(response.data);
-        console.log("Product Data:", response.data); // For debugging
+    Promise.all([
+      axiosInstance.get(`/products/${id}`),
+      axiosInstance.get(`/products/${id}/related`),
+    ])
+      .then(([productResponse, relatedResponse]) => {
+        setProduct(productResponse.data);
+        console.log("Product Data:", productResponse.data);
+        setRelatedProducts(relatedResponse.data.related_products || []); 
+        console.log("Related Products:", relatedResponse.data.related_products);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching product:", error);
-        setError("Failed to fetch product details.");
+        console.error("Error fetching data:", error);
+        setError("Failed to fetch product details or related products.");
         setLoading(false);
       });
   }, [id, router.isReady]);
 
-  // Function to handle adding the product to the cart
+  const handleBuyNow = () => {
+    if (product) {
+      const productToAdd = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      };
+      addToCart(productToAdd);
+      router.push("/checkout/delivery-info");
+    }
+  };
+
   const handleAddToCart = () => {
     if (product) {
       const productToAdd = {
@@ -43,7 +59,7 @@ function ProductDetail() {
         image: product.image,
       };
       addToCart(productToAdd);
-      console.log(`${product.name} added to cart!`); // Optional feedback
+      console.log(`${product.name} added to cart!`);
     }
   };
 
@@ -126,15 +142,15 @@ function ProductDetail() {
                 </dl>
                 <hr className="text-muted" />
                 <div className="d-flex">
-                  <a
-                    href="#"
+                  <button
                     className="btn btn-primary px-md-4 col col-md-auto me-2"
+                    onClick={handleBuyNow}
                   >
                     Buy now
-                  </a>
+                  </button>
                   <button
                     className="btn btn-outline-primary col col-md-auto"
-                    onClick={handleAddToCart} // Add click handler
+                    onClick={handleAddToCart}
                   >
                     <FontAwesomeIcon icon={["fas", "cart-plus"]} />
                      Add to cart
@@ -182,11 +198,19 @@ function ProductDetail() {
                 <h5 className="my-auto fw-semibold">Related products</h5>
               </div>
               <div className="card-body">
-                <ProductSimpleHorizontal id={1} />
-                <ProductSimpleHorizontal id={2} />
-                <ProductSimpleHorizontal id={3} />
-                <ProductSimpleHorizontal id={4} />
-                <ProductSimpleHorizontal id={5} />
+                {relatedProducts.length > 0 ? (
+                  relatedProducts.map((relatedProduct) => (
+                    <ProductSimpleHorizontal
+                      key={relatedProduct.id}
+                      image={relatedProduct.image}
+                      name={relatedProduct.name}
+                      price={relatedProduct.price}
+                      id={relatedProduct.id}
+                    />
+                  ))
+                ) : (
+                  <p>No related products available.</p>
+                )}
               </div>
             </div>
           </div>

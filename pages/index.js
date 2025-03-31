@@ -73,21 +73,21 @@ export default function Home() {
             >
               <div className="ratio ratio-21x9">
                 <img
-                  src="/images/online-shopping.jpg"
+                  src="/images/watch-1.jpg"
                   alt="Cover image"
                   className="rounded"
                 />
               </div>
               <div className="ratio ratio-21x9">
                 <img
-                  src="/images/online-shopping.jpg"
+                  src="/images/watch-2.jpg"
                   alt="Cover image"
                   className="rounded"
                 />
               </div>
               <div className="ratio ratio-21x9">
                 <img
-                  src="/images/online-shopping.jpg"
+                  src="/images/watch-3.jpg"
                   alt="Cover image"
                   className="rounded"
                 />

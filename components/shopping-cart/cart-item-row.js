@@ -37,7 +37,7 @@ function CartItemRow({ product, quantity, onIncrease, onDecrease, onRemove }) {
         <div className="hstack">
           <img
             className="rounded"
-            src={product.media[0].original_url || `https://source.unsplash.com/random/100x100?random=${Math.floor(Math.random() * 50)}`}
+            src={product.image || product.image_urls[0]}
             width={80}
             height={80}
             alt={product.name || "Product image"}
