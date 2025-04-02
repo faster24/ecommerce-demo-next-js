@@ -67,6 +67,7 @@ function ExploreProducts() {
       });
   };
 
+    console.log(products);
   // Update URL and fetch products on filter submit
   const handleFilterSubmit = (e) => {
     e.preventDefault();

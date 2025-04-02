@@ -2,7 +2,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 function CartItemRow({ product, quantity, onIncrease, onDecrease, onRemove }) {
-  console.log(product);
+  const getImageUrl = () => {
+    if (product.image) return product.image;
+    if (product.image_urls?.[0]) return product.image_urls[0];
+    if (product.media?.[0]?.original_url) return product.media[0].original_url;
+    return null;
+  };
+
   const getQtyInput = () => {
     return (
       <div className="input-group input-group-sm" style={{ width: 100 }}>
@@ -37,7 +43,7 @@ function CartItemRow({ product, quantity, onIncrease, onDecrease, onRemove }) {
         <div className="hstack">
           <img
             className="rounded"
-            src={product.image || product.image_urls[0]}
+            src={getImageUrl()}
             width={80}
             height={80}
             alt={product.name || "Product image"}

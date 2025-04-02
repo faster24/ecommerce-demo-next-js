@@ -10,10 +10,8 @@ const axiosInstance = axios.create({
   withCredentials: true, // Send cookies with requests (if needed)
 });
 
-// Optional: Add request interceptors
 axiosInstance.interceptors.request.use(
   (config) => {
-    // You can modify the request config here (e.g., add authentication tokens)
     const token = localStorage.getItem('token'); // Example: Get token from localStorage
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -25,7 +23,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Optional: Add response interceptors
 axiosInstance.interceptors.response.use(
   (response) => {
     // Handle successful responses
