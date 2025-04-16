@@ -4,15 +4,14 @@ import ProductSimpleCard from "../components/product/product-simple-card";
 import { useEffect, useState } from "react";
 import axiosInstance from "../api/api";
 import Link from "next/link";
-import { useAppContext } from "../lib/AppContext"; // Import AppContext
+import { useAppContext } from "../lib/AppContext"; 
 
 export default function Home() {
-  const { addToCart } = useAppContext(); // Get addToCart from context
+  const { addToCart } = useAppContext(); 
   const [products, setProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
-    // Fetch products
     axiosInstance
       .get("/products")
       .then((response) => {
@@ -23,7 +22,6 @@ export default function Home() {
         console.error("Error fetching products:", error);
       });
 
-    // Fetch blogs
     axiosInstance
       .get("/blogs?page=1")
       .then((response) => {

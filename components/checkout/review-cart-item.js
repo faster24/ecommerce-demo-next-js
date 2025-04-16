@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 function ReviewCartItem({ item }) {
-  console.log(item);
   if (!item) {
     return <div className="text-muted">No item data available</div>;
   }
@@ -13,7 +12,7 @@ function ReviewCartItem({ item }) {
       <div className="flex-shrink-0">
         <img
           className="rounded"
-          src={item.image_urls[0]}
+          src={item.image_urls?.[0] ?? item.media?.[0]?.original_url}
           width={80}
           height={80}
           alt={`${name} image`}

@@ -1,18 +1,17 @@
 import axios from 'axios';
 
-// Create an Axios instance with default configurations
 const axiosInstance = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api', // Replace with your Laravel backend URL
+  baseURL: 'http://127.0.0.1:8000/api', 
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Send cookies with requests (if needed)
+  withCredentials: true, 
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); // Example: Get token from localStorage
+    const token = localStorage.getItem('token'); 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,14 +24,11 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    // Handle successful responses
     return response;
   },
   (error) => {
-    // Handle errors (e.g., redirect to login page if unauthorized)
     if (error.response && error.response.status === 401) {
       console.error('Unauthorized! Redirecting to login...');
-      // Example: Redirect to login page
       window.location.href = '/auth/login';
     }
     return Promise.reject(error);
