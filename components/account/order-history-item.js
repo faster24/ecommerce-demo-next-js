@@ -1,6 +1,22 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
 
+const ORDER_STATUS_MAP = {
+  new: { label: "New", className: "text-primary" },
+  processing: { label: "Processing", className: "text-info" },
+  shipped: { label: "Shipped", className: "text-warning" },
+  delivered: { label: "Delivered", className: "text-success" },
+  cancelled: { label: "Cancelled", className: "text-danger" },
+};
+
+const DELIVERY_STATUS_MAP = {
+  pending: { label: "Pending", className: "text-secondary" },
+  out_for_delivery: { label: "Out for Delivery", className: "text-warning" },
+  delivered: { label: "Delivered", className: "text-success" },
+  failed: { label: "Failed", className: "text-danger" },
+  returned: { label: "Returned", className: "text-info" },
+};
+
 function OrderHistoryItem({
   id,
   number,
@@ -9,12 +25,22 @@ function OrderHistoryItem({
   shippingPrice,
   shippingMethod,
   shippingAddress,
+  deliveryStatus,
   items,
   createdAt,
-  cancel,
 }) {
   // Calculate subtotal from items (total_price includes shipping, so subtract it for subtotal)
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+
+  // Get display values and classes for status and deliveryStatus
+  const orderStatus = ORDER_STATUS_MAP[status] || {
+    label: status,
+    className: "text-muted",
+  };
+  const deliveryStatusInfo = DELIVERY_STATUS_MAP[deliveryStatus] || {
+    label: deliveryStatus,
+    className: "text-muted",
+  };
 
   return (
     <div className="card border-0 shadow-sm mb-3">
@@ -33,10 +59,10 @@ function OrderHistoryItem({
               <div className="vstack text-dark small">
                 <span>{shippingAddress.street}</span>
                 <span>
-                  {shippingAddress.city}, {shippingAddress.state} {shippingAddress.zip}
+                  {shippingAddress.city}, {shippingAddress.state}{" "}
+                  {shippingAddress.zip}
                 </span>
                 <span>{shippingAddress.country}</span>
-                {/* Assuming customer contact info might be added later */}
                 <span>Tel: N/A</span>
                 <span>Email: N/A</span>
               </div>
@@ -72,16 +98,19 @@ function OrderHistoryItem({
           </div>
           <div className="col-md-3">
             <h6 className="fw-bold">Status</h6>
-            <div className={cancel ? "text-danger" : "text-success"}>
-              <span className="fw-semibold">
-                {status.toUpperCase()} {cancel && "(Cancelled)"}
-              </span>
+            <div className={orderStatus.className}>
+              <span className="fw-semibold">{orderStatus.label}</span>
+            </div>
+            <h6 className="fw-bold mt-2">Delivery Status</h6>
+            <div className={deliveryStatusInfo.className}>
+              <span className="fw-semibold">{deliveryStatusInfo.label}</span>
             </div>
             <h6 className="fw-bold mt-3">Items</h6>
             <ul className="list-unstyled small">
               {items.map((item) => (
                 <li key={item.product_id}>
-                  <strong>{item.product_name}</strong> - Qty: {item.quantity} - ${item.total}
+                  <strong>{item.product_name}</strong> - Qty: {item.quantity} - $
+                  {item.total.toFixed(2)}
                   {item.product_description && (
                     <p className="text-muted">{item.product_description}</p>
                   )}
@@ -108,7 +137,13 @@ function OrderHistoryItem({
 OrderHistoryItem.propTypes = {
   id: PropTypes.number.isRequired,
   number: PropTypes.string.isRequired,
-  status: PropTypes.string.isRequired,
+  status: PropTypes.oneOf([
+    "new",
+    "processing",
+    "shipped",
+    "delivered",
+    "cancelled",
+  ]).isRequired,
   total: PropTypes.number.isRequired,
   shippingPrice: PropTypes.number.isRequired,
   shippingMethod: PropTypes.string.isRequired,
@@ -119,6 +154,13 @@ OrderHistoryItem.propTypes = {
     state: PropTypes.string,
     zip: PropTypes.string,
   }),
+  deliveryStatus: PropTypes.oneOf([
+    "pending",
+    "out_for_delivery",
+    "delivered",
+    "failed",
+    "returned",
+  ]).isRequired,
   items: PropTypes.arrayOf(
     PropTypes.shape({
       product_id: PropTypes.number,
@@ -132,7 +174,6 @@ OrderHistoryItem.propTypes = {
     })
   ).isRequired,
   createdAt: PropTypes.string.isRequired,
-  cancel: PropTypes.bool,
 };
 
 export default OrderHistoryItem;

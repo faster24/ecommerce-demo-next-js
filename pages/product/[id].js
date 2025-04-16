@@ -122,10 +122,9 @@ function ProductDetail() {
               <div className="vstack">
                 <div className="d-flex mb-3 gap-2">
                   <ProductRating />
-                  <span className="text-muted small">150 orders</span>
-                  <span className="text-success small">
-                    <FontAwesomeIcon icon={["fas", "check-circle"]} />
-                     In Stock
+                  <span className={`small ${product.stock_qty > 0 ? 'text-success' : 'text-danger'}`}>
+                    <FontAwesomeIcon icon={["fas", product.stock_qty > 0 ? 'check-circle' : 'times-circle']} className="me-1" />
+                    {product.stock_qty > 0 ? 'In Stock' : 'Out of Stock'}
                   </span>
                 </div>
                 <h4 className="fw-semibold">{product.price}Ks</h4>

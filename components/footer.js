@@ -37,13 +37,7 @@ function Footer() {
             <div className="col-md-6 col-lg-2 d-none d-md-block">
               <h5 className="text-light">Information</h5>
               <div className="vstack small gap-2">
-                <a href="#" className="footer-link">
-                  About us
-                </a>
-                <a href="#" className="footer-link">
-                  Find a store
-                </a>
-                <a href="#" className="footer-link">
+                <a href="/policy" className="footer-link">
                   Terms & conditions
                 </a>
               </div>

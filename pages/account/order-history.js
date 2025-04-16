@@ -90,6 +90,7 @@ function OrderHistory() {
                   id={order.id}
                   number={order.number}
                   status={order.status}
+                  deliveryStatus={order.delivery_status}
                   total={order.total_price}
                   shippingPrice={order.shipping_price}
                   shippingMethod={order.shipping_method}
