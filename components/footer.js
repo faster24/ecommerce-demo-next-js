@@ -87,7 +87,7 @@ function Footer() {
       <footer className="py-4 bg-primary-dark">
         <div className="container d-flex">
           <span className="text-light text-opacity-50 my-auto">
-            &copy; {new Date().getFullYear()} Mocha Mart
+            &copy; {new Date().getFullYear()}  Swiss Time Square
           </span>
           <div className="ms-auto hstack gap-4">
             <a href="#" className="ms-auto link-light">
