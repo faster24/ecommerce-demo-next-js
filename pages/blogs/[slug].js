@@ -98,10 +98,10 @@ export default function BlogPost() {
       </div>
 
       {/* Blog Image */}
-      {blog.image && (
+      {blog.media[0].original_url && (
         <div className="mb-4">
           <img
-            src={`http://localhost:8000/storage/${blog.image}`}
+            src={`${blog.media[0].original_url}`}
             alt={blog.title}
             className="img-fluid rounded"
             style={{ maxHeight: "400px", objectFit: "cover", width: "100%" }}

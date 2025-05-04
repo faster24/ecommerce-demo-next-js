@@ -11,8 +11,7 @@ function Footer() {
               <h5 className="text-light">Contact us</h5>
               <div className="vstack gap-1">
                 <p className="mb-2 text-light text-opacity-75 small">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Integer in feugiat lorem.
+                  If you have questions about this Privacy Policy, please contact us at:
                 </p>
                 <small className="d-flex text-light text-opacity-75 gap-2">
                   <FontAwesomeIcon
@@ -53,9 +52,6 @@ function Footer() {
                 </Link>
                 <Link href="/account/profile">
                   <a className="footer-link">Account Setting</a>
-                </Link>
-                <Link href="/account/current-orders">
-                  <a className="footer-link">My Orders</a>
                 </Link>
               </div>
             </div>

@@ -83,9 +83,9 @@ export default function Blogs() {
           {blogs.map((blog) => (
             <div className="col" key={blog.id}>
               <div className="card h-100 border-0 shadow-sm">
-                {blog.image && (
+                {blog.media[0].original_url && (
                   <img
-                    src={`http://localhost:8000/storage/${blog.image}`}
+                    src={`${blog.media[0].original_url}`}
                     alt={blog.title}
                     className="card-img-top"
                     style={{ height: "200px", objectFit: "cover" }}
