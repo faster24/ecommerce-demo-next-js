@@ -85,18 +85,6 @@ function ShoppingCart() {
         </div>
         <div className="col-lg-4">
           <div className="card mb-3 border-0 shadow-sm">
-            <div className="card-body">
-              <div className="input-group">
-                <input
-                  className="form-control"
-                  type="text"
-                  placeholder="Coupon code here"
-                />
-                <button type="button" className="btn btn-primary">
-                  Apply
-                </button>
-              </div>
-            </div>
           </div>
           <PricingCard subtotal={subtotal} total={total} onCheckout={buyOrder} />
         </div>
