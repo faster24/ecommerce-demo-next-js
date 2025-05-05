@@ -4,6 +4,9 @@ import Link from "next/link";
 function ProductGridCard({ id, title, off, image, price, product, addToCart }) {
   let percentOff;
   let offPrice = `${price}Ks`;
+  const isInStock = product.stock_qty > 0;
+  const stockStatus = isInStock ? "In Stock" : "Out of Stock";
+  const stockStatusClass = isInStock ? "text-success" : "text-danger";
 
   if (off && off > 0) {
     percentOff = (
@@ -49,7 +52,9 @@ function ProductGridCard({ id, title, off, image, price, product, addToCart }) {
           </Link>
 
           <h6 className="fw-semibold">{offPrice}</h6>
-
+          <p className={`card-text small ${stockStatusClass}`}>
+            {stockStatus}
+          </p>
           <div className="hstack gap-2">
             {/* Mobile/Tablet View (md and below) */}
             <button
@@ -58,20 +63,16 @@ function ProductGridCard({ id, title, off, image, price, product, addToCart }) {
             >
               <FontAwesomeIcon icon={["fas", "cart-plus"]} /> Add to Cart
             </button>
-            <button className="btn btn-outline-secondary text-primary border d-md-block d-lg-none">
-              <FontAwesomeIcon icon={["far", "heart"]} />
-            </button>
 
             {/* Desktop View (lg and above) */}
             <button
               className="btn btn-sm btn-secondary text-primary flex-grow-1 d-none d-lg-block"
               onClick={handleAddToCart}
+              disabled={!product.stock_qty > 0}
             >
               <FontAwesomeIcon icon={["fas", "cart-plus"]} /> Add to Cart
             </button>
-            <button className="btn btn-sm btn-outline-secondary text-primary border d-none d-lg-block">
-              <FontAwesomeIcon icon={["far", "heart"]} />
-            </button>
+            
           </div>
         </div>
       </div>

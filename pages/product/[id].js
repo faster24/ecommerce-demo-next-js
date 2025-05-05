@@ -144,12 +144,14 @@ function ProductDetail() {
                   <button
                     className="btn btn-primary px-md-4 col col-md-auto me-2"
                     onClick={handleBuyNow}
+                    disabled={!product.stock_qty > 0}
                   >
                     Buy now
                   </button>
                   <button
                     className="btn btn-outline-primary col col-md-auto"
                     onClick={handleAddToCart}
+                    disabled={!product.stock_qty > 0}
                   >
                     <FontAwesomeIcon icon={["fas", "cart-plus"]} />
                      Add to cart
@@ -205,6 +207,7 @@ function ProductDetail() {
                       name={relatedProduct.name}
                       price={relatedProduct.price}
                       id={relatedProduct.id}
+                      stock={relatedProduct.stock_qty}
                     />
                   ))
                 ) : (

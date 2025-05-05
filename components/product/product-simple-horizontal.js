@@ -1,8 +1,15 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
-function ProductSimpleHorizontal({ id , image , name , price }) {
+function ProductSimpleHorizontal({ id , image , name , price  , stock}) {
+
+  // Determine stock status
+  const isInStock = stock > 0;
+  const stockStatus = isInStock ? "In Stock" : "Out of Stock";
+  const stockStatusClass = isInStock ? "text-success" : "text-danger";
+
   return (
+
     <div className="d-flex py-2">
       <div className="flex-shink-0" style={{ height: 80 }}>
         <img
@@ -20,7 +27,10 @@ function ProductSimpleHorizontal({ id , image , name , price }) {
         </Link>
         <h6 className="mb-0 fw-semibold">{price} Ks</h6>
         <div className="mt-auto">
-          <button className="btn btn-sm btn-secondary text-primary rounded-3">
+          <button 
+            className="btn btn-sm btn-secondary text-primary rounded-3"
+            disabled={isInStock}
+          >
             <FontAwesomeIcon icon={("fas", "cart-plus")} />
             &nbsp;Add to cart
           </button>
